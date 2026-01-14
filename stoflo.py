@@ -54,13 +54,14 @@ class model:
 
             # 
             for iteration in range(self.niter):
+                ti=self.t[i]+iteration*self.dt/self.niter
                 # Get the stocks at previous timestep:
                 i_stocks={s: self.stocks[s][i+1] for s in self.stocks}
                 dSdt={s: 0. for s in self.stocks}
                 
                 # Get all the flows for the current timestep:
                 for f in self.flows.values():
-                    rate=f.func(i_stocks,self.pars)
+                    rate=f.func(ti,i_stocks,self.pars)
                     if f.into:
                         dSdt[f.into]+=rate*self.dt/self.niter
                     if f.outfrom:
