@@ -78,6 +78,14 @@ class model:
                 for s in self.stocks:
                     self.stocks[s][i+1]=i_stocks[s]+dSdt[s]
 
+        # Save all the flows:
+        flowOutput={}
+        for flow in self.flows.values():
+            flowOutput[flow.name]=np.zeros(self.nt)
+            for i in range(self.nt):
+                flowOutput[flow.name][i]=flow.func(self.t[i],{x: self.stocks[x][i] for x in self.stocks},self.pars)
+        self.flowOutput=flowOutput
+
         
 # Since flows have functions within them, this needs to be a separate class:
 class flow:
