@@ -45,6 +45,12 @@ class model:
         self.drivers[name]={'ts': ts, 'into': into, 'outfrom': outfrom}
 
     def runEuler(self):
+
+        # Initialize arrays to save all the flows:
+        flowOutput={}
+        for flow in self.flows.values():
+            flowOutput[flow.name]=np.zeros(self.nt)
+
         # Loop in time using explicit Euler with niter calculation steps
         for i in range(self.nt-1):
             
@@ -62,6 +68,7 @@ class model:
                 # Get all the flows for the current timestep:
                 for f in self.flows.values():
                     rate=f.func(ti,i_stocks,self.pars)
+                    flowOutput[f.name][i]+=rate/self.niter
                     if f.into:
                         dSdt[f.into]+=rate*self.dt/self.niter
                     if f.outfrom:
@@ -78,14 +85,12 @@ class model:
                 for s in self.stocks:
                     self.stocks[s][i+1]=i_stocks[s]+dSdt[s]
 
-        # Save all the flows:
-        flowOutput={}
-        for flow in self.flows.values():
-            flowOutput[flow.name]=np.zeros(self.nt)
-            for i in range(self.nt):
-                flowOutput[flow.name][i]=flow.func(self.t[i],{x: self.stocks[x][i] for x in self.stocks},self.pars)
+        # Save the flows
         self.flowOutput=flowOutput
 
+    def getNow(self,t,Y):
+        i=int((t-self.tStart)/self.dt)
+        return Y[i]
         
 # Since flows have functions within them, this needs to be a separate class:
 class flow:
